@@ -28,8 +28,11 @@ class ViewController: UIViewController {
         view.backgroundColor = UIColor(red:0.14, green:0.10, blue:0.36, alpha:1.00)
         movieLabels = [movieLabelOne, movieLabelTwo, movieLabelThree ,movieLabelFour]
         createButton()
-        createThankYouLabel()
-        createMovieImageView()
+//        OperationQueue.main.addOperation {
+            createThankYouLabel()
+            createMovieImageView()
+//        }
+
         
     }
     
@@ -89,6 +92,8 @@ extension ViewController {
     
     func searchFilm(_ title: String) {
         
+
+        
         let search = title.addingPercentEncoding(withAllowedCharacters: .urlQueryAllowed)!
         
         let string = "http://www.omdbapi.com/?t=\(search)&y=&plot=short&r=json"
@@ -118,6 +123,10 @@ extension ViewController {
     
     func downloadImage(at url: URL) {
         
+        let queue = OperationQueue()
+        queue.qualityOfService = .userInitiated
+        queue.maxConcurrentOperationCount = 1
+        
         let request = URLRequest(url: url)
         
         let session = URLSession(configuration: .default)
@@ -127,8 +136,12 @@ extension ViewController {
             guard let imageData = data else { return }
             
             let image = UIImage(data: imageData)!
-            
-            self.display(image: image)
+            if queue.operationCount == 0 {
+                DispatchQueue.main.async {
+                    self.display(image: image)
+                }
+                
+            }
             
             }.resume()
     }
